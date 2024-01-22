@@ -1,9 +1,22 @@
-import { Form, useLoaderData } from "react-router-dom";
-import { getContact } from "../contacts";
+import { Form, useLoaderData, useFetcher } from "react-router-dom";
+import { getContact, updateContact } from "../contacts";
 
 export async function loader({ params }) {
   const contact = await getContact(params.contactId);
   return { contact };
+}
+
+/**
+ * As always, our form has fields with a name prop. 
+ * This form will send formData with a favorite key that's either "true" | "false". 
+ * Since it's got method="post" it will call the action. 
+ * Since there is no <Fetcher.Form action="..."> prop, it will post to the route where the form is rendered.
+ */
+export async function action({ request, params }) {
+  let formData = await request.formData();
+  return updateContact(params.contactId, {
+    favorite: formData.get('favorite') === 'true',
+  })
 }
 
 export default function Contact() {
@@ -69,10 +82,11 @@ export default function Contact() {
 }
 
 function Favorite({ contact }) {
+  const Fetcher = useFetcher();
   // yes, this is a `let` for later
   let favorite = contact.favorite;
   return (
-    <Form method="post">
+    <Fetcher.Form method="post">
       <button
         name="favorite"
         value={favorite ? "false" : "true"}
@@ -84,6 +98,6 @@ function Favorite({ contact }) {
       >
         {favorite ? "★" : "☆"}
       </button>
-    </Form>
+    </Fetcher.Form>
   );
 }
