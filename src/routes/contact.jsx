@@ -10,7 +10,7 @@ export async function loader({ params }) {
  * As always, our form has fields with a name prop. 
  * This form will send formData with a favorite key that's either "true" | "false". 
  * Since it's got method="post" it will call the action. 
- * Since there is no <Fetcher.Form action="..."> prop, it will post to the route where the form is rendered.
+ * Since there is no <fetcher.Form action="..."> prop, it will post to the route where the form is rendered.
  */
 export async function action({ request, params }) {
   let formData = await request.formData();
@@ -82,11 +82,14 @@ export default function Contact() {
 }
 
 function Favorite({ contact }) {
-  const Fetcher = useFetcher();
-  // yes, this is a `let` for later
+  const fetcher = useFetcher();
+
   let favorite = contact.favorite;
+  if (fetcher.formData) {
+    favorite = fetcher.formData.get('favorite') === 'true';
+  }
   return (
-    <Fetcher.Form method="post">
+    <fetcher.Form method="post">
       <button
         name="favorite"
         value={favorite ? "false" : "true"}
@@ -98,6 +101,6 @@ function Favorite({ contact }) {
       >
         {favorite ? "★" : "☆"}
       </button>
-    </Fetcher.Form>
+    </fetcher.Form>
   );
 }
